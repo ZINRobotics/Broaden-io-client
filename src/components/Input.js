@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react'
 
 export class Input extends Component {
@@ -21,11 +20,17 @@ export class Input extends Component {
     }
   }
 
+  onChange(e) {
+    const regex = new RegExp(this.props.validation)
+    const valid = regex.test(e.target.value);
+    this.props.onChange(e.target.value, valid);
+  }
+
   drawErrorMessage() {
     if (this.props.errorMessage) {
-      return (<div >{this.props.errorMessage}</div>)
+      return (<div className="form-control-feedback">{this.props.errorMessage}</div>)
     } else {
-      return <div >Invalid input</div>
+      return <div className="form-control-feedback">Invalid input</div>
     }
   }
 
@@ -42,10 +47,11 @@ export class Input extends Component {
             className="form-control form-control-success"
             placeholder={this.props.placeholder}
             value={this.props.text}
-            disabled={(this.props.type === 'disabled') ? true : false} />
+            disabled={(this.props.type === 'disabled') ? true : false}
+            />
         </div>
       )
-    } else if (valid === false && ((this.props.text === null || this.props.text === "") === false)) {
+    } else if (valid === false && ((this.props.text === null || this.props.text === "") === false || this.props.submitted)) {
       return (
         <div className={(this.props.label) ? `form-group label-floating has-danger` : `form-group has-danger`}>
           {this.drawLabel()}
@@ -55,7 +61,8 @@ export class Input extends Component {
             className="form-control form-control-danger"
             placeholder={this.props.placeholder}
             value={this.props.text}
-            disabled={(this.props.type === 'disabled') ? true : false} />
+            disabled={(this.props.type === 'disabled') ? true : false}
+            />
           {this.drawErrorMessage()}
         </div>
       )
@@ -68,7 +75,8 @@ export class Input extends Component {
             type={(this.props.type) ? this.props.type : `text`}
             className="form-control"
             placeholder={this.props.placeholder}
-            value={this.props.text} />
+            value={this.props.text}
+            />
         </div>
       )
     }
@@ -76,12 +84,12 @@ export class Input extends Component {
 
   validate() {
     const regex = new RegExp(this.props.validation)
-    return regex.test(this.props.text)
+    const valid = regex.test(this.props.text);
+    return valid;
   }
 
   render() {
     const valid = (this.props.validation != null) ? this.validate() : null
-    {/*console.log("Valid:", valid)*/}
     return (
       <div>
         {this.drawInputForm(valid)}

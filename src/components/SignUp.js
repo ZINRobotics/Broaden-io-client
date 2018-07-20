@@ -52,29 +52,34 @@ class SignUp extends Component {
   }
 
   submitForm() {
-    if (this.state.isValid) {
-      bcrypt.genSalt(11, (err, salt) => {
-        bcrypt.hash(this.state.rawPassword, salt, (err, hash) => {
-          const newUser = {...this.state.registerForm, password: hash}
-          axios.post(`${serverPath}/signup`, newUser)
-            .then(response => {
-              if (response.status === 200) {
-                this.props.loginUser({ username: newUser.username, password: this.state.rawPassword })
-              } else {
-                return Promise.reject('could not signup')
-              }
-            }).then(() => {
-              if (!this.props.auth.isAuthenticated) {
-                Alert('signupError');
-              }
-            }).catch(error => {
-              Alert('signupError');
-            })
-        });
-      });
-    } else {
-      Alert('signupError');
+    // e.preventDefault();
+    this.setState({
+      ...this.state,
+      submitted: true
+    });
+    if (!this.state.isValid) {
+      console.log("validation error");
+      return;
     }
+    bcrypt.genSalt(11, (err, salt) => {
+      bcrypt.hash(this.state.rawPassword, salt, (err, hash) => {
+        const newUser = {...this.state.registerForm, password: hash}
+        axios.post(`${serverPath}/signup`, newUser)
+          .then(response => {
+            if (response.status === 200) {
+              this.props.loginUser({ username: newUser.username, password: this.state.rawPassword })
+            } else {
+              return Promise.reject('could not signup')
+            }
+          }).then(() => {
+            if (!this.props.auth.isAuthenticated) {
+              Alert('signupError');
+            }
+          }).catch(error => {
+            Alert('signupError');
+          })
+      });
+    });
   }
 
 
@@ -136,24 +141,29 @@ class SignUp extends Component {
                             </span>
                             <Input
                               text={this.state.registerForm.username}
-                              onChange={(newValue) => this.setState({registerForm: {...this.state.registerFrom, username: newValue}})}
-                              placeholder="Username ..."
-                              validation="([A-Za-z]{5,})"
+                              onChange={(newValue, valid) => this.setState({...this.state, registerForm: {...this.state.registerForm, username: newValue}, isValid: valid})}
+                              validation="([a-zA-Z0-9.,]{5,})"
+                              label="Username ..."
                               errorMessage="Username must be 5 or more characters"
-                              className="form-control"
+                              submitted={this.state.submitted}
                             />
                           </div>
                           <div className="input-group">
                             <span className="input-group-addon">
                               <i className="material-icons">email</i>
                             </span>
+                            {/*<input type="text" value={this.state.registerForm.email} onChange={(e) => {
+                              this.setState({...this.state, registerForm: {...this.state.registerForm, email: e.target.value}}, () => {
+                                this.validate()
+                              })
+                            }} className="form-control" placeholder="Email..."/>*/}
                             <Input
                               text={this.state.registerForm.email}
-                              onChange={(newValue) => this.setState({registerForm: {...this.state.registerFrom, email: newValue}})}
-                              placeholder="Email ..."
-                              validation="([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])+)"
-                              errorMessage="Invalid Email Address"
-                              className="form-control"
+                              onChange={(newValue, valid) => this.setState({...this.state, registerForm: {...this.state.registerForm, email: newValue}, isValid: valid})}
+                              validation="(?:[a-z0-9!#$%'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%'*+/=?^_`{|}~-]+)*|(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*)@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"
+                              label="Email"
+                              errorMessage="Input valid email address."
+                              submitted={this.state.submitted}
                             />
                           </div>
                           <div className="input-group">
@@ -161,13 +171,12 @@ class SignUp extends Component {
                               <i className="material-icons">lock_outline</i>
                             </span>
                             <Input
-                              text={this.state.registerForm.password}
-                              onChange={(newValue) => this.setState({registerForm: {...this.state.registerFrom, password: newValue}})}
-                              placeholder="Password ..."
-                              validation="([.]{5,})"
-                              errorMessage="Password must be 5 or more characters"
-                              className="form-control"
-                              id="inputError1"
+                              text={this.state.rawPassword}
+                              onChange={(newValue, valid) => this.setState({...this.state, rawPassword: newValue, isValid: valid})}
+                              validation="(.{8,})"
+                              label="Password"
+                              errorMessage="Password should be 8+ characters."
+                              submitted={this.state.submitted}
                             />
                           </div>
                           {/*<!-- If you want to add a checkbox to this form, uncomment this code -->*/}
@@ -183,13 +192,6 @@ class SignUp extends Component {
                         </div>
 
                         <div className="footer text-center">
-                          {/*<button className="btn btn-info btn-round" onClick={() => this.setState({ submitted: true })}>Get Started...</button>
-                                    <SweetAlert
-                                    show={this.state.submitted}
-                                    title="Awesome"
-                                    text="Your account has been created successfully!"
-                                    onConfirm={() => this.setState({ submitted: false })}
-                                    />*/}
                           <button className="btn btn-info btn-round btn-lg" onClick={this.submitForm}>Get Started...</button>
 
 
