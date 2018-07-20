@@ -10,10 +10,10 @@ export const Alert = (type) => {
       });
       break
     case 'signupError':
-      toast('Could not signup', {
+      toast('Could not signup, Username must be greater than or equal to 5 characters', {
         autoClose: 3000,
         className: "alert alert-rose",
-        render: '<h2><strong>Could not login</strong></h2>'
+        render: '<h2><strong>Could not signup, Username must be greater than or equal to 5 characters</strong></h2>'
       });
       break
     default:
